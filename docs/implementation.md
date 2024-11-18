@@ -119,7 +119,7 @@ Para consultar tabelas armazenadas no S3 utilizando Athena, é necessário regis
     
 - Configurar um Glue Crawler para detectar automaticamente os esquemas dos arquivos parquet da camada Gold e registrar as tabelas no Glue Data Catalog. Para este projeto, vamos considerar apenas os arquivos do modelo dimensional (tabelas Dimensão e Fato).
 
-- Com as tabelas disponíveis no Glue Catalog, é possível utilizar o Athena para executar queries SQL e consumir esses dados. Para monitorar consultas e verificar erros ou problemas de desempenho, é possível habilitar o AWS CloudWatch Logs, e conecta-lo ao SNS (Simple Notification Service) para receber as notificações de erro no e-mail por exemplo. Em ```scripts/sales_vs_month.sql``` é possível encontrar uma query SQL que pode ser utilizada no Athena. Essa query faz uma consolidação dos dados do modelo dimensional, armazenados na camada Gold.
+- Com as tabelas disponíveis no Glue Catalog, é possível utilizar o Athena para executar queries SQL e consumir esses dados. Para monitorar consultas e verificar erros ou problemas de desempenho, é possível habilitar o AWS CloudWatch Logs, e conecta-lo ao SNS (Simple Notification Service) para receber as notificações de erro no e-mail por exemplo. Em ```scripts/monthly_sales.sql``` é possível encontrar uma query SQL que pode ser utilizada no Athena. Essa query faz uma consolidação dos dados do modelo dimensional, armazenados na camada Gold.
 
 ## 8 - Alinhamento da solução com Arquitetura Moderna AWS.
 
