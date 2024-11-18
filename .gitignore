@@ -1,0 +1,3 @@
+# files to ignore
+#s3/raw/*
+scripts/config.py
