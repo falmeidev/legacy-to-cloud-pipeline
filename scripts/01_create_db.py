@@ -1,41 +1,41 @@
 import psycopg2
 from config import DB_CONFIG
 
-# Função para criar o banco de dados 'legacy_sales_db' caso ele ainda não exista
+# Function to create the 'legacy_sales_db' database if it doesn't already exist
 def create_database():
     try:
-        # Conecta ao servidor PostgreSQL utilizando as configurações definidas em 'DB_CONFIG'
-        # 'DB_CONFIG' deve conter informações como host, usuário, senha e porta.
+        # Connects to the PostgreSQL server using the configurations defined in 'DB_CONFIG'
+        # 'DB_CONFIG' should contain details like host, user, password, and port.
         conn = psycopg2.connect(**DB_CONFIG)
-        # Ativa o modo de autocommit, necessário para executar comandos como CREATE DATABASE.
-        # Sem autocommit, o comando seria parte de uma transação, o que não é permitido para CREATE DATABASE.
+        # Enables autocommit mode, required to execute commands like CREATE DATABASE.
+        # Without autocommit, the command would be part of a transaction, which is not allowed for CREATE DATABASE.
         conn.autocommit = True  
-        # Cria um cursor para executar comandos SQL no servidor PostgreSQL.
+        # Creates a cursor to execute SQL commands on the PostgreSQL server.
         cursor = conn.cursor()
         
-        # Verifica se o banco de dados 'legacy_sales_db' já existe.
-        # A consulta SELECT 1 retorna uma linha se o banco existir, caso contrário, não retorna nada.
+        # Checks if the 'legacy_sales_db' database already exists.
+        # The SELECT 1 query returns a row if the database exists; otherwise, it returns nothing.
         cursor.execute("SELECT 1 FROM pg_database WHERE datname = 'legacy_sales_db'")
-        # Se o cursor não retornar nenhum resultado, significa que o banco não existe.
+        # If the cursor does not return any result, it means the database does not exist.
         if not cursor.fetchone():
-            # Cria o banco de dados 'legacy_sales_db' caso ele não exista.
+            # Creates the 'legacy_sales_db' database if it does not exist.
             cursor.execute("CREATE DATABASE legacy_sales_db")
-            print("Banco de dados 'legacy_sales_db' criado com sucesso.")
+            print("Database 'legacy_sales_db' created successfully.")
         else:
-            # Informa que o banco já existe e não é necessário criá-lo.
-            print("Banco de dados 'legacy_sales_db' já existe.")
+            # Informs that the database already exists and does not need to be created.
+            print("Database 'legacy_sales_db' already exists.")
 
-    # Captura qualquer exceção que possa ocorrer durante o processo de conexão ou execução de comandos.    
+    # Captures any exception that may occur during the connection or execution of commands.    
     except Exception as e:
-        print("Erro ao criar o banco de dados:", e)
+        print("Error creating the database:", e)
     
-    # Bloco 'finally' é usado para garantir que os recursos sejam liberados adequadamente,
-    # independentemente de sucesso ou falha no bloco 'try'.
+    # The 'finally' block is used to ensure that resources are properly released,
+    # regardless of success or failure in the 'try' block.
     finally:
-        if cursor:  # Verifica se o cursor foi inicializado
-            cursor.close() # Fecha o cursor para liberar recursos
-        if conn:  # Verifica se a conexão foi estabelecida
-            conn.close() # Fecha a conexão com o banco de dados
+        if cursor:  # Checks if the cursor was initialized
+            cursor.close() # Closes the cursor to release resources
+        if conn:  # Checks if the connection was established
+            conn.close() # Closes the connection to the database
 
-# Executa a função create_database
+# Executes the create_database function
 create_database()

@@ -3,12 +3,12 @@ from datetime import datetime, timedelta
 import random
 from config import DB_CONFIG
 
-# Função para gerar dados fictícios de vendas
+# Function to generate fake sales data
 def generate_sales_data(num_records=500):
     start_date = datetime(2023, 1, 1)
     end_date = datetime(2023, 12, 31)
     products = list(range(101, 111))
-    regions = ['Norte', 'Sul', 'Leste', 'Oeste', 'Centro']
+    regions = ['North', 'South', 'East', 'West', 'Center']
     
     sales_data = []
     for _ in range(num_records):
@@ -25,16 +25,16 @@ def generate_sales_data(num_records=500):
         sales_data.append(sale)
     return sales_data
 
-# Função para criar a tabela e inserir os dados
+# Function to create the table and insert data
 def create_and_insert_sales():
-    conn = None  # Inicializa a variável de conexão
-    cursor = None  # Inicializa a variável do cursor
+    conn = None  # Initializes the connection variable
+    cursor = None  # Initializes the cursor variable
     try:
-        # Conectar ao banco de dados PostgreSQL usando as configurações armazenadas em DB_CONFIG
+        # Connect to the PostgreSQL database using the settings stored in DB_CONFIG
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        # Comando SQL para criar a tabela 'sales' se ela ainda não existir
+        # SQL command to create the 'sales' table if it doesn't already exist
         create_table_query = """
         CREATE TABLE IF NOT EXISTS sales (
             id SERIAL PRIMARY KEY,
@@ -48,38 +48,38 @@ def create_and_insert_sales():
             region VARCHAR(50) NOT NULL
         );
         """
-        # Executa o comando SQL para criar a tabela
+        # Executes the SQL command to create the table
         cursor.execute(create_table_query)
-        # Confirma a criação da tabela no banco de dados
+        # Confirms the table creation in the database
         conn.commit()
-        print("Tabela 'sales' criada com sucesso.")
+        print("Table 'sales' created successfully.")
         
-        # Gera dados fictícios para inserir na tabela
+        # Generates fake data to insert into the table
         sales_data = generate_sales_data(500)
         
-        # Inserir os dados gerados
+        # Insert the generated data
         insert_query = """
         INSERT INTO sales (sale_date, product_id, customer_id, quantity, unit_price, total_value, seller_id, region)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
-        # Insere os dados gerados na tabela usando executemany, que permite múltiplos inserts em uma única operação
+        # Inserts the generated data into the table using executemany, which allows multiple inserts in a single operation
         cursor.executemany(insert_query, sales_data)
-        # Confirma a inserção dos dados no banco
+        # Confirms the data insertion in the database
         conn.commit()
-        print(f"{cursor.rowcount} registros inseridos com sucesso.")
+        print(f"{cursor.rowcount} records inserted successfully.")
     
-    # Tratamento de exceções para capturar erros durante a execução
+    # Exception handling to capture errors during execution
     except Exception as e:
-        # Exibe a mensagem de erro
-        print("Erro:", e)
+        # Displays the error message
+        print("Error:", e)
     
-    # Bloco finally para garantir o fechamento de recursos mesmo em caso de erro
+    # Finally block to ensure resources are closed even in case of an error
     finally:
-        # Fechar cursor e conexão, se foram criados
+        # Close the cursor and connection if they were created
         if cursor is not None:
             cursor.close()
         if conn is not None:
             conn.close()
 
-# Chama a função para criar a tabela e inserir os dados
+# Calls the function to create the table and insert data
 create_and_insert_sales()

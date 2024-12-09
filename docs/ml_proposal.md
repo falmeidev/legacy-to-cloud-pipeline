@@ -1,92 +1,92 @@
-# Proposta: Modelo de Machine Learning no Amazon SageMaker para Previsão de Vendas Futuras
+# Proposal: Machine Learning Model on Amazon SageMaker for Future Sales Forecasting
 
-## **1. Objetivo**
+## **1. Objective**
 
-Desenvolver um modelo de machine learning para prever vendas futuras (valores ou quantidades) com base em dados históricos. O modelo ajudará a:
-- Identificar tendências de vendas.
-- Planejar estoques e recursos.
-- Melhorar campanhas de marketing.
-
----
-
-## **2. Dados Necessários**
-
-Os dados devem ser extraídos da **camada Gold**. Para o modelo, serão selecionados os seguintes dados:
-
-| **Coluna**      | **Descrição**                                   |
-|------------------|-----------------------------------------------|
-| `sale_date`      | Data da venda.                                |
-| `total_sales`    | Valor total das vendas.                       |
-| `product_id`     | Identificador do produto.                     |
-| `customer_id`    | Identificador do cliente.                     |
-| `region`         | Região onde a venda foi realizada.            |
+Develop a machine learning model to forecast future sales (values or quantities) based on historical data. The model aims to:
+- Identify sales trends.
+- Plan inventory and resources.
+- Enhance marketing campaigns.
 
 ---
 
-## **3. Abordagem do Modelo**
+## **2. Required Data**
 
-### **Modelo Proposto: Regressão Linear e/ou XGBoost**
-- **Regressão Linear**:
-  - Modelo simples para identificar relações entre o tempo e as vendas.
+Data will be extracted from the **Gold layer**. The selected features for the model include:
+
+| **Column**      | **Description**                              |
+|------------------|---------------------------------------------|
+| `sale_date`      | Sale date.                                  |
+| `total_sales`    | Total sales value.                          |
+| `product_id`     | Product identifier.                         |
+| `customer_id`    | Customer identifier.                        |
+| `region`         | Region where the sale occurred.             |
+
+---
+
+## **3. Model Approach**
+
+### **Proposed Models: Linear Regression and/or XGBoost**
+- **Linear Regression**:
+  - A simple model to identify relationships between time and sales.
 - **XGBoost**:
-  - Algoritmo robusto e eficiente para lidar com dados complexos e múltiplas features.
+  - A robust and efficient algorithm for handling complex data with multiple features.
 
-### **Recursos Adicionais para Melhorar o Modelo**
-- **Média Móvel**:
-  - Média de vendas nos últimos 7 ou 30 dias.
-- **Tendências Sazonais**:
-  - Diferença percentual entre o mês atual e o mesmo mês no ano anterior.
-
----
-
-## **4. Fluxo de Implementação no Amazon SageMaker**
-
-### **Passo 1: Preparação dos Dados**
-1. **Fonte dos Dados**:
-   - Dados armazenados no Amazon S3 em formato Parquet, já processados e armazenados na camada Gold.
-2. **Divisão dos Dados**:
-   - **Treino (70%)**: Período histórico.
-   - **Validação (15%)**: Período recente para ajustar o modelo.
-   - **Teste (15%)**: Para avaliar o desempenho.
+### **Additional Features to Improve the Model**
+- **Moving Average**:
+  - Average sales over the last 7 or 30 days.
+- **Seasonal Trends**:
+  - Percentage difference between the current month and the same month in the previous year.
 
 ---
 
-### **Passo 2: Criação do Notebook no SageMaker**
-1. Iniciar um notebook no SageMaker.
-2. Conectar ao Amazon S3 para carregar os dados.
-3. Usar bibliotecas como **pandas**, **scikit-learn** ou o **XGBoost SDK** para processamento e modelagem.
+## **4. Implementation Workflow on Amazon SageMaker**
+
+### **Step 1: Data Preparation**
+1. **Data Source**:
+   - Data stored in Amazon S3 in Parquet format, processed and stored in the Gold layer.
+2. **Data Splitting**:
+   - **Training (70%)**: Historical period.
+   - **Validation (15%)**: Recent period to adjust the model.
+   - **Testing (15%)**: To evaluate performance.
 
 ---
 
-### **Passo 3: Treinamento do Modelo**
+### **Step 2: Creating a Notebook in SageMaker**
+1. Launch a notebook in SageMaker.
+2. Connect to Amazon S3 to load the data.
+3. Use libraries like **pandas**, **scikit-learn**, or the **XGBoost SDK** for data processing and modeling.
 
-Exemplo de código para treinar um modelo de regressão usando XGBoost no SageMaker:
+---
+
+### **Step 3: Model Training**
+
+Example code for training a regression model using XGBoost in SageMaker:
 
 ```python
 import sagemaker
 from sagemaker import get_execution_role
 from sagemaker.estimator import Estimator
 
-# Configuração básica
+# Basic configuration
 role = get_execution_role()
 session = sagemaker.Session()
-bucket = 'nome-do-seu-bucket'
+bucket = 'your-bucket-name'
 
-# Caminho dos dados
-train_data = f's3://{bucket}/dados/treino.csv'
-validation_data = f's3://{bucket}/dados/validacao.csv'
+# Data paths
+train_data = f's3://{bucket}/data/train.csv'
+validation_data = f's3://{bucket}/data/validation.csv'
 
-# Definição do Estimator para XGBoost
+# Define the XGBoost Estimator
 xgboost_estimator = Estimator(
     image_uri=sagemaker.image_uris.retrieve("xgboost", session.boto_region_name, "1.5-1"),
     role=role,
     instance_count=1,
     instance_type="ml.m5.large",
-    output_path=f's3://{bucket}/modelos/xgboost/',
+    output_path=f's3://{bucket}/models/xgboost/',
     sagemaker_session=session
 )
 
-# Hiperparâmetros do XGBoost
+# Set XGBoost hyperparameters
 xgboost_estimator.set_hyperparameters(
     objective="reg:squarederror",
     num_round=100,
@@ -97,5 +97,5 @@ xgboost_estimator.set_hyperparameters(
     verbosity=1
 )
 
-# Treinamento do modelo
+# Train the model
 xgboost_estimator.fit({'train': train_data, 'validation': validation_data})

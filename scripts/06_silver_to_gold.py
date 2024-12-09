@@ -2,87 +2,87 @@ import pandas as pd
 import os
 import glob
 
-# Definir caminhos para as camadas Silver e Gold
-SILVER_DATA_PATH = "s3/silver/sales_silver"  # Diretório da camada Silver
-GOLD_DATA_PATH = "s3/gold/"  # Diretório base para a camada Gold
+# Define paths for Silver and Gold layers
+SILVER_DATA_PATH = "s3/silver/sales_silver"  # Silver layer directory
+GOLD_DATA_PATH = "s3/gold/"  # Base directory for the Gold layer
 
-# Garantir que o diretório da camada Gold exista
+# Ensure the Gold directory exists
 def ensure_gold_directory_exists():
-    # Verifica se o caminho definido em 'GOLD_DATA_PATH' existe
+    # Check if the path defined in 'GOLD_DATA_PATH' exists
     if not os.path.exists(GOLD_DATA_PATH):
-        # Cria o diretório caso ele não exista
+        # Create the directory if it doesn't exist
         os.makedirs(GOLD_DATA_PATH)
-        # Mensagem informando que o diretório foi criado
-        print(f"Diretório criado: {GOLD_DATA_PATH}")
+        # Message indicating the directory was created
+        print(f"Directory created: {GOLD_DATA_PATH}")
     else:
-        # Se o diretório já existir, exibe uma mensagem informativa
-        print(f"Diretório já existe: {GOLD_DATA_PATH}")
+        # If the directory already exists, display an informational message
+        print(f"Directory already exists: {GOLD_DATA_PATH}")
 
-# Processar os dados da camada Silver e criar as tabelas dimensionais e fato
+# Process data from the Silver layer and create dimension and fact tables
 def process_and_move_to_gold():
-    # Encontra todos os arquivos no formato Parquet armazenados na camada Silver
+    # Find all Parquet files stored in the Silver layer
     silver_files = glob.glob(os.path.join(SILVER_DATA_PATH, "*.parquet"))
 
-    # Verifica se existem arquivos na camada Silver
+    # Check if there are files in the Silver layer
     if not silver_files:
-        # Mensagem caso não existam dados
-        print("Nenhum arquivo Parquet encontrado na camada Silver.")
-        return # Finaliza a função se não houver arquivos para processar
+        # Message if no data is found
+        print("No Parquet files found in the Silver layer.")
+        return  # Exit the function if there are no files to process
 
-    # Carrega todos os arquivos Parquet encontrados em um único DataFrame utilizando pandas
+    # Load all Parquet files into a single DataFrame using pandas
     sales_data = pd.concat([pd.read_parquet(file) for file in silver_files], ignore_index=True)
-    print(f"Dados carregados da camada Silver. Total de linhas: {len(sales_data)}")
+    print(f"Data loaded from Silver layer. Total rows: {len(sales_data)}")
 
-    # **Criação das Dimensões**
-    # Dimensão 'Produto': Lista única de produtos (IDs)
+    # **Creating Dimensions**
+    # Product Dimension: Unique list of products (IDs)
     dim_product = sales_data[['product_id']].drop_duplicates().reset_index(drop=True)
-    # Dimensão 'Cliente': Combina cliente com sua região, eliminando duplicatas
+    # Customer Dimension: Combine customer with their region, removing duplicates
     dim_customer = sales_data[['customer_id', 'region']].drop_duplicates().reset_index(drop=True)
-    # Dimensão 'Vendedor': Lista única de IDs de vendedores
+    # Seller Dimension: Unique list of seller IDs
     dim_seller = sales_data[['seller_id']].drop_duplicates().reset_index(drop=True)
-    # Dimensão 'Data': Lista única de datas com atributos adicionais (ano, mês, dia)
+    # Date Dimension: Unique list of dates with additional attributes (year, month, day)
     dim_date = sales_data[['sale_date']].drop_duplicates().reset_index(drop=True)
-    dim_date['year'] = pd.to_datetime(dim_date['sale_date']).dt.year # Extração do ano
-    dim_date['month'] = pd.to_datetime(dim_date['sale_date']).dt.month # Extração do mês
-    dim_date['day'] = pd.to_datetime(dim_date['sale_date']).dt.day # Extração do dia
+    dim_date['year'] = pd.to_datetime(dim_date['sale_date']).dt.year  # Extract year
+    dim_date['month'] = pd.to_datetime(dim_date['sale_date']).dt.month  # Extract month
+    dim_date['day'] = pd.to_datetime(dim_date['sale_date']).dt.day  # Extract day
 
-    # **Criação da Tabela Fato**
-    # Contém informações transacionais das vendas (chaves de dimensão e métricas)
+    # **Creating Fact Table**
+    # Contains transactional sales information (dimension keys and metrics)
     fact_sales = sales_data[['sale_date', 'product_id', 'customer_id', 'seller_id', 'quantity', 'total_value']]
 
-    # **Agregação Diária**
-    # Agrupa as vendas por data e calcula métricas como total de vendas e quantidade total
+    # **Daily Aggregation**
+    # Group sales by date and calculate metrics like total sales and total quantity
     daily_sales = fact_sales.groupby('sale_date').agg(
         total_sales=('total_value', 'sum'),
         total_quantity=('quantity', 'sum')
     ).reset_index()
 
-    # **Salvar Dimensões e Tabelas Fato na Camada Gold**
-    # Cada dimensão e tabela fato é salva como um arquivo Parquet separado na camada Gold
+    # **Save Dimensions and Fact Tables to the Gold Layer**
+    # Each dimension and fact table is saved as a separate Parquet file in the Gold layer
     dim_product.to_parquet(os.path.join(GOLD_DATA_PATH, "dim_product.parquet"), index=False)
     dim_customer.to_parquet(os.path.join(GOLD_DATA_PATH, "dim_customer.parquet"), index=False)
     dim_seller.to_parquet(os.path.join(GOLD_DATA_PATH, "dim_seller.parquet"), index=False)
     dim_date.to_parquet(os.path.join(GOLD_DATA_PATH, "dim_date.parquet"), index=False)
     fact_sales.to_parquet(os.path.join(GOLD_DATA_PATH, "fact_sales.parquet"), index=False)
 
-    # **Particionamento de Vendas Diárias**
-    # Adiciona colunas de partição (ano, mês, dia) para organizar os dados
+    # **Partitioning Daily Sales**
+    # Add partition columns (year, month, day) to organize the data
     daily_sales['sale_date'] = pd.to_datetime(daily_sales['sale_date'])
     daily_sales['year'] = daily_sales['sale_date'].dt.year
     daily_sales['month'] = daily_sales['sale_date'].dt.month
     daily_sales['day'] = daily_sales['sale_date'].dt.day
 
-    # Define o caminho para salvar as vendas diárias na camada Gold
+    # Define the path to save daily sales in the Gold layer
     gold_daily_sales_path = os.path.join(GOLD_DATA_PATH, "daily_sales/")
-    # Garante que o diretório para vendas diárias particionadas exista
+    # Ensure the directory for partitioned daily sales exists
     if not os.path.exists(gold_daily_sales_path):
         os.makedirs(gold_daily_sales_path)
-    # Salva os dados particionados por ano/mês/dia no formato Parquet
+    # Save the data partitioned by year/month/day in Parquet format
     daily_sales.to_parquet(gold_daily_sales_path, index=False, partition_cols=['year', 'month', 'day'])
 
-    # Mensagem de sucesso após o processamento
-    print("Dados processados e salvos na camada Gold com sucesso.")
+    # Success message after processing
+    print("Data processed and saved to the Gold layer successfully.")
 
 
-ensure_gold_directory_exists()  # Garantir que o diretório Gold exista
-process_and_move_to_gold()  # Executar o pipeline Silver → Gold
+ensure_gold_directory_exists()  # Ensure the Gold directory exists
+process_and_move_to_gold()  # Execute the Silver → Gold pipeline

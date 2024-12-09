@@ -1,96 +1,96 @@
-# Dashboard de Análise de Vendas Mensais
+# Monthly Sales Analysis Dashboard
 
 ---
 
-## **Filtros**
+## **Filters**
 
-- **Data da Venda:** Data range que permite selecionar o período desejado das vendas.
-- **Produto Vendido:** Caixa de texto que permite pesquisar e selecionar os produtos desejados.
-- **Região da Venda:** Dropdown com as opções de regiões, que permita secionar 1 ou mais regiões.
-
----
-
-### **Visão Geral em Cards**
-- **Total de Vendas (R$):** Valor total de vendas no período selecionado.
-- **Quantidade Total Vendida:** Total de itens vendidos.
-- **Mês de Melhor Desempenho:** Mês com maior volume de vendas.
-- **Produto Mais Vendido:** Nome do produto mais vendido.
-- **Vendedor Top Performer:** Nome do vendedor com maior volume de vendas.
+- **Sale Date:** A date range to select the desired sales period.
+- **Product Sold:** A text box to search and select specific products.
+- **Sales Region:** A dropdown to select one or more regions.
 
 ---
 
-## **Seção 2: Vendas por Mês**
-
-### **Gráfico de Linhas**
-- **Eixo X:** Meses do ano (Janeiro, Fevereiro, etc).
-- **Eixo Y:** Total de vendas (em R$).
-- **Linhas:** Diferentes cores para cada ano, permitindo comparar tendências ano a ano.
-
-### **Filtro local para este visual**
-- **Ano:** Permitir selecionar um ou mais anos para visualizar a comparação.
+### **Overview in Cards**
+- **Total Sales (in currency):** The total sales value for the selected period.
+- **Total Quantity Sold:** The total number of items sold.
+- **Best Performing Month:** The month with the highest sales volume.
+- **Best Selling Product:** The name of the top-selling product.
+- **Top Performer Seller:** The name of the seller with the highest sales volume.
 
 ---
 
-## **Seção 3: Vendas por Produto**
+## **Section 2: Monthly Sales**
 
-### **Tabela de Produtos**
-| **Nome do Produto** | **Quantidade Vendida** | **Total de Vendas (R$)** | **Participação no Total (%)** |
-|----------------------|------------------------|---------------------------|-------------------------------|
-| Produto A            | 1.000                 | 10.000,00                | 25%                           |
-| Produto B            | 750                   | 7.500,00                 | 18%                           |
+### **Line Chart**
+- **X-Axis:** Months of the year (January, February, etc.).
+- **Y-Axis:** Total sales (in currency).
+- **Lines:** Different colors for each year to compare trends year over year.
 
-### **Gráfico de Barras Horizontal**
-- **Eixo X:** Total de vendas (em R$).
-- **Eixo Y:** Nome dos produtos.
-- Mostra os **Top 10 produtos mais vendidos**.
+### **Local Filter for This Visual**
+- **Year:** Allows selecting one or more years to view comparisons.
 
 ---
 
-## **Seção 4: Vendas por Cliente**
+## **Section 3: Sales by Product**
 
-### **Gráfico de Pizza ou Donut**
-- **Segmentação:** Top 5 clientes versus Outros.
-- Mostra a participação dos clientes no total de vendas.
+### **Product Table**
+| **Product Name**    | **Quantity Sold** | **Total Sales (in currency)** | **Share of Total (%)** |
+|----------------------|-------------------|--------------------------------|------------------------|
+| Product A            | 1,000            | 10,000.00                     | 25%                   |
+| Product B            | 750              | 7,500.00                      | 18%                   |
 
-### **Tabela Detalhada**
-| **Nome do Cliente** | **Região**  | **Quantidade Comprada** | **Total Gasto (R$)** |
-|----------------------|------------|--------------------------|-----------------------|
-| Cliente A            | Sudeste    | 500                      | 5.000,00             |
-| Cliente B            | Nordeste   | 300                      | 3.000,00             |
-
----
-
-## **Seção 5: Vendas por Vendedor**
-
-### **Tabela de Vendedores**
-| **Nome do Vendedor** | **Quantidade Vendida** | **Total de Vendas (R$)** | **Participação no Total (%)** |
-|-----------------------|------------------------|---------------------------|-------------------------------|
-| Vendedor X            | 1.500                 | 15.000,00                | 30%                           |
-| Vendedor Y            | 1.000                 | 10.000,00                | 20%                           |
-
-### **Gráfico de Barras Vertical**
-- **Eixo X:** Nome dos vendedores.
-- **Eixo Y:** Total de vendas (em R$).
+### **Horizontal Bar Chart**
+- **X-Axis:** Total sales (in currency).
+- **Y-Axis:** Product names.
+- Displays the **Top 10 Best-Selling Products**.
 
 ---
 
-## **Ferramentas de Interatividade**
+## **Section 4: Sales by Customer**
 
-### **Tooltip Dinâmico**
-- Ao passar o cursor sobre gráficos, exibir detalhes como:
-  - Quantidade vendida.
-  - Faturamento acumulado.
+### **Pie or Donut Chart**
+- **Segmentation:** Top 5 customers versus Others.
+- Displays the share of customers in total sales.
 
-### **Botão de Exportação**
-- Exportar gráficos ou tabelas para **CSV**, **PDF** ou **Excel**.
+### **Detailed Table**
+| **Customer Name**    | **Region**  | **Quantity Purchased** | **Total Spent (in currency)** |
+|-----------------------|------------|-------------------------|------------------------------|
+| Customer A            | Southeast  | 500                     | 5,000.00                    |
+| Customer B            | Northeast  | 300                     | 3,000.00                    |
 
 ---
 
-## **Ferramentas Recomendadas**
+## **Section 5: Sales by Seller**
 
-### **Ferramentas para Implementação**
-- **Power BI** ou **Tableau**: Para design e visualização interativa.
-- **Amazon QuickSight**: analisar dados armazenados no S3 ou Redshift.
+### **Seller Table**
+| **Seller Name**      | **Quantity Sold** | **Total Sales (in currency)** | **Share of Total (%)** |
+|-----------------------|-------------------|--------------------------------|------------------------|
+| Seller X             | 1,500            | 15,000.00                     | 30%                   |
+| Seller Y             | 1,000            | 10,000.00                     | 20%                   |
 
-### **Conexões com Dados**
-- Integrar os dados da camada **Gold** diretamente ao dashboard para garantir que os insights sejam baseados nos dados processados mais recentes.
+### **Vertical Bar Chart**
+- **X-Axis:** Seller names.
+- **Y-Axis:** Total sales (in currency).
+
+---
+
+## **Interactivity Tools**
+
+### **Dynamic Tooltip**
+- Hovering over charts displays details such as:
+  - Quantity sold.
+  - Cumulative revenue.
+
+### **Export Button**
+- Export charts or tables to **CSV**, **PDF**, or **Excel**.
+
+---
+
+## **Recommended Tools**
+
+### **Implementation Tools**
+- **Power BI** or **Tableau**: For interactive design and visualization.
+- **Amazon QuickSight**: To analyze data stored in S3 or Redshift.
+
+### **Data Connections**
+- Integrate **Gold Layer** data directly into the dashboard to ensure insights are based on the most recent processed data.

@@ -2,59 +2,59 @@ import pandas as pd
 import os
 import glob
 
-# Definir caminhos para as camadas BRONZE e SILVER
+# Define paths for BRONZE and SILVER layers
 BRONZE_DATA_PATH = "s3/bronze/sales_bronze/"
 SILVER_DATA_PATH = "s3/silver/sales_silver/"
 
-# Garantir que o diretório da camada Silver exista
+# Ensure the SILVER directory exists
 def ensure_silver_directory_exists():
     if not os.path.exists(SILVER_DATA_PATH):
         os.makedirs(SILVER_DATA_PATH)
-        print(f"Diretório criado: {SILVER_DATA_PATH}")
+        print(f"Directory created: {SILVER_DATA_PATH}")
     else:
-        print(f"Diretório já existe: {SILVER_DATA_PATH}")
+        print(f"Directory already exists: {SILVER_DATA_PATH}")
 
-# Função para processar dados: converter datas e remover duplicatas
+# Function to process data: convert dates and remove duplicates
 def process_data(df):
-    # Converter datas para o formato ISO (YYYY-MM-DD)
-    if 'sale_date' in df.columns:  # Substitua 'sale_date' pelo nome da sua coluna de data
-        df['sale_date'] = pd.to_datetime(df['sale_date']).dt.strftime('%Y-%m-%d')  # Converter para ISO
+    # Convert dates to ISO format (YYYY-MM-DD)
+    if 'sale_date' in df.columns:  # Replace 'sale_date' with the name of your date column
+        df['sale_date'] = pd.to_datetime(df['sale_date']).dt.strftime('%Y-%m-%d')  # Convert to ISO format
     else:
-        raise ValueError("A coluna 'sale_date' não foi encontrada no dataset.")
+        raise ValueError("The column 'sale_date' was not found in the dataset.")
 
-    # Remover duplicatas
+    # Remove duplicates
     df = df.drop_duplicates()
 
     return df
 
-# Função para mover dados da camada Bronze para a camada Silver
+# Function to move data from BRONZE layer to SILVER layer
 def bronze_to_silver():
     try:
-        # Encontra todos os arquivos Parquet na camada Bronze
+        # Find all Parquet files in the BRONZE layer
         bronze_files = glob.glob(os.path.join(BRONZE_DATA_PATH, "**/*.parquet"), recursive=True)
         
         if not bronze_files:
-            raise FileNotFoundError("Nenhum arquivo encontrado na camada Bronze.")
+            raise FileNotFoundError("No files found in the BRONZE layer.")
 
-        # Inicializar o DataFrame consolidado
+        # Initialize the consolidated DataFrame
         processed_data = pd.DataFrame()
 
         for file in bronze_files:
-            print(f"Processando arquivo: {file}")
+            print(f"Processing file: {file}")
             
-            # Ler o arquivo Parquet
+            # Read the Parquet file
             bronze_data = pd.read_parquet(file)
 
-            # Processar os dados
+            # Process the data
             processed_data = pd.concat([processed_data, process_data(bronze_data)], ignore_index=True)
 
-        # Salvar o DataFrame consolidado na camada Silver
+        # Save the consolidated DataFrame to the SILVER layer
         processed_data.to_parquet(f'{SILVER_DATA_PATH}/sales.parquet', index=False)
-        print(f"Dados processados e salvos na camada Silver: {SILVER_DATA_PATH}/sales.parquet")
+        print(f"Data processed and saved to SILVER layer: {SILVER_DATA_PATH}/sales.parquet")
 
     except Exception as e:
-        print(f"Erro ao mover dados para a camada Silver: {e}")
+        print(f"Error moving data to the SILVER layer: {e}")
 
 
-ensure_silver_directory_exists()  # Garantir que o diretório Silver exista
-bronze_to_silver()  # Executar a movimentação BRONZE → SILVER
+ensure_silver_directory_exists()  # Ensure the SILVER directory exists
+bronze_to_silver()  # Execute the BRONZE → SILVER transformation

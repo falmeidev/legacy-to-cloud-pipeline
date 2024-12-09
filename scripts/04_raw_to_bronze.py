@@ -1,51 +1,51 @@
 import pandas as pd
 import os
 
-# Definir caminhos para as camadas RAW e BRONZE
-RAW_DATA_PATH = "s3/raw/sales_raw.csv"  # Caminho para o arquivo RAW (CSV)
-BRONZE_DATA_PATH = "s3/bronze/sales_bronze"  # Diretório base para a camada BRONZE (Parquet)
+# Define paths for RAW and BRONZE layers
+RAW_DATA_PATH = "s3/raw/sales_raw.csv"  # Path to the RAW file (CSV)
+BRONZE_DATA_PATH = "s3/bronze/sales_bronze"  # Base directory for the BRONZE layer (Parquet)
 
-# Garantir que o diretório da camada Bronze exista
+# Ensure the BRONZE directory exists
 def ensure_bronze_directory_exists():
     if not os.path.exists(BRONZE_DATA_PATH):
         os.makedirs(BRONZE_DATA_PATH)
-        print(f"Diretório criado: {BRONZE_DATA_PATH}")
+        print(f"Directory created: {BRONZE_DATA_PATH}")
     else:
-        print(f"Diretório já existe: {BRONZE_DATA_PATH}")
+        print(f"Directory already exists: {BRONZE_DATA_PATH}")
 
-# Função para adicionar partições
+# Function to add partitions
 def process_data(df):
-    # Converter colunas de data para o formato ISO e criar partições
-    if 'sale_date' in df.columns:  # Substitua 'sale_date' pelo nome da sua coluna de data
-        df['year'] = df['sale_date'].dt.year              # Criar coluna para o ano
-        df['month'] = df['sale_date'].dt.month            # Criar coluna para o mês
-        df['day'] = df['sale_date'].dt.day                # Criar coluna para o dia
+    # Convert date columns to ISO format and create partitions
+    if 'sale_date' in df.columns:  # Replace 'sale_date' with the name of your date column
+        df['year'] = pd.to_datetime(df['sale_date']).dt.year  # Create a column for the year
+        df['month'] = pd.to_datetime(df['sale_date']).dt.month  # Create a column for the month
+        df['day'] = pd.to_datetime(df['sale_date']).dt.day  # Create a column for the day
     else:
-        raise ValueError("A coluna 'sale_date' não foi encontrada no dataset.")
+        raise ValueError("The column 'sale_date' was not found in the dataset.")
 
     return df
 
-# Função para converter dados de CSV (RAW) para Parquet (BRONZE) com partições
+# Function to convert data from CSV (RAW) to Parquet (BRONZE) with partitions
 def raw_to_bronze():
     try:
-        # Ler os dados da camada RAW (CSV)
-        print(f"Lendo dados da camada RAW: {RAW_DATA_PATH}")
+        # Read the data from the RAW layer (CSV)
+        print(f"Reading data from RAW layer: {RAW_DATA_PATH}")
         raw_data = pd.read_csv(RAW_DATA_PATH)
 
-        # criar partições 
-        print("Processando os dados...")
+        # Process the data to create partitions
+        print("Processing data...")
         processed_data = process_data(raw_data)
 
-        # Salvar os dados na camada BRONZE como Parquet com partições
-        print(f"Salvando dados na camada BRONZE (particionado): {BRONZE_DATA_PATH}")
+        # Save the data to the BRONZE layer as Parquet with partitions
+        print(f"Saving data to BRONZE layer (partitioned): {BRONZE_DATA_PATH}")
         processed_data.to_parquet(
-            BRONZE_DATA_PATH,  # Diretório base
+            BRONZE_DATA_PATH,  # Base directory
             index=False,
-            partition_cols=['year', 'month', 'day']  # Definir partições
+            partition_cols=['year', 'month', 'day']  # Define partitions
         )
-        print("Dados processados e salvos no formato Parquet com sucesso.")
+        print("Data successfully processed and saved in Parquet format.")
     except Exception as e:
-        print(f"Erro ao processar os dados: {e}")
+        print(f"Error processing data: {e}")
 
-ensure_bronze_directory_exists()  # Garantir que o diretório Bronze exista
-raw_to_bronze()  # Executar a conversão RAW → BRONZE
+ensure_bronze_directory_exists()  # Ensure the BRONZE directory exists
+raw_to_bronze()  # Execute the RAW → BRONZE conversion
